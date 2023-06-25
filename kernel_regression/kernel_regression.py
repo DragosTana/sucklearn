@@ -21,6 +21,9 @@ class KernelRegression(BaseEstimator, RegressorMixin):
         self.reg_type = reg_type
 
     def fit(self, X, y):
+        """
+        Fit the KernelRegression model according to the given training data.
+        """
         X, y = check_X_y(X, y, accept_sparse=True)
         self.is_fitted_ = True
         self.X_ = np.array(X)
@@ -28,6 +31,9 @@ class KernelRegression(BaseEstimator, RegressorMixin):
         return self
 
     def predict(self, X):
+        """
+        Predict regression target for X.
+        """
         X = check_array(X, accept_sparse=True)
         check_is_fitted(self, 'is_fitted_')
 

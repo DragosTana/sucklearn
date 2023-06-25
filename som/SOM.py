@@ -50,14 +50,23 @@ class SOMCluster(BaseEstimator, ClusterMixin):
         self.random_state_ = None
 
     def _initialize_weights(self, X: np.ndarray) -> None:
+        """
+        Initialize the weights.
+        """
         self.random_state_ = check_random_state(self.random_state)
         self.weights_ = self.random_state_.randn(*self.map_size, X.shape[1])
 
     def _find_bmu(self, x: np.ndarray) -> Tuple[int, int]:
+        """
+        Find the best matching unit (BMU) for the given input.
+        """
         bmu_idx = np.linalg.norm(self.weights_ - x, axis=2).argmin()
         return np.unravel_index(bmu_idx, self.map_size)
 
     def _update_weights(self, x: np.ndarray, bmu: Tuple[int, int]) -> None:
+        """
+        Update the weights.
+        """
         distances = np.linalg.norm(np.indices(self.map_size).T - bmu, axis=2)
         influence = np.exp(-distances**2 / (2 * self.sigma**2))
         learning_rate = self.learning_rate * np.exp(-self.iteration / self.max_iter)
@@ -65,11 +74,17 @@ class SOMCluster(BaseEstimator, ClusterMixin):
         self.weights_ += delta
 
     def _calculate_quantization_error(self, X: np.ndarray) -> float:
+        """
+        Calculate the quantization error.
+        """
         bmu_indices = np.array([self._find_bmu(x) for x in X])
         quantization_error = np.mean(np.linalg.norm(X - self.weights_[bmu_indices], axis=1))
         return quantization_error
 
     def fit(self, X: np.ndarray) -> 'SOMCluster':
+        """
+        Fit the SOMCluster model according to the given training data.
+        """
         self._initialize_weights(X)
         self.iteration = 0
         prev_error = None
@@ -92,12 +107,21 @@ class SOMCluster(BaseEstimator, ClusterMixin):
         return self
 
     def predict(self, X: np.ndarray) -> np.ndarray:
+        """
+        Predict the closest cluster each sample in X belongs to.
+        """
         bmu_indices = np.array([self._find_bmu(x) for x in X])
         labels = np.ravel_multi_index(bmu_indices, self.map_size)
         return labels
     
     def get_neuron_coordinates(self) -> np.ndarray:
+        """
+        Get the coordinates of the neurons.
+        """
         return np.indices(self.map_size).reshape(2, -1).T
 
     def get_neuron_weights(self) -> np.ndarray:
+        """
+        Get the weights of the neurons.
+        """
         return self.weights_.reshape(-1, self.weights_.shape[2])
